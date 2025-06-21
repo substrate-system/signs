@@ -1,5 +1,5 @@
 import { test } from '@substrate-system/tapzero'
-import { sign, effect, CycleError } from '../src/index.js'
+import { Sign, sign, effect, CycleError } from '../src/index.js'
 
 test('create a signal', async t => {
     t.ok('ok', 'should be an example')
@@ -71,21 +71,35 @@ test('A nested effect', t => {
 // })
 
 test('Update a value inside an effect', t => {
+    t.plan(Sign.MAX_DEPTH + 1)  // 1 assertion in each recursion, + throws
+    // t.plan(2)
     const hello = sign('hello')
 
-    let foo = 0
+    let calls = 0
 
-    t.throws(() => {
+    try {
         effect(() => {
-            foo++
-            console.log('foooo', foo)
-            console.log('value', hello.value)
-            if (foo === 1) {
-                t.equal(hello.value, 'hello')
+            calls++
+            if (calls === 1) {
+                t.equal(hello.value, 'hello', 'Called with inital value')
+            } else {
+                t.equal(hello.value, '' + (calls - 1), 'Should reset the value')
             }
-            hello.value = 'abc'
+            hello.value = '' + calls
         })
-    }, CycleError.message, 'should throw an error')
+    } catch (_err) {
+        const err = _err as Error
+        t.equal(err.message, CycleError.message, 'should throw the error')
+    }
+
+    // t.throws(() => {
+    //     // unsub = effect(() => {
+    // }, CycleError.message, 'should throw an error')
+
+    // unsub()
+
+    // this then throws the error for real
+    // hello.value = '123'
 })
 
 // test('test', t => {
