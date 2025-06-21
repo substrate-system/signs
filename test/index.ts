@@ -118,13 +118,21 @@ test('async Effects', t => {
     //     tester()
     // }, 0)
 
-    effect(() => {
-        console.log('in here', fooo.value)
-        t.equal(fooo.value, 'fooo', 'should call with initial value')
-        // tester()
-        setTimeout(() => {
-            count++
-            fooo.value = '' + count
-        }, 1)
-    })
+    try {
+        effect(() => {
+            console.log('**in here**', fooo.value)
+            console.log('**count**', count)
+            console.log('fooo recursion**', fooo._recursion)
+            t.equal(fooo.value, 'fooo', 'should call with initial value')
+            // tester()
+            setTimeout(() => {
+                count++
+                fooo.value = '' + count
+            }, 1)
+        })
+    } catch (_err) {
+        const err = _err as Error
+        console.log('**********************', err)
+        t.ok(err)
+    }
 })

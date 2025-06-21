@@ -8,10 +8,12 @@ export class Sign<T=any|undefined> {
 
     _value?:T
     _recursion:number
+    MAX_DEPTH:number
 
     constructor (value?:T) {
         this._recursion = 0
         this._value = value
+        this.MAX_DEPTH = Sign.MAX_DEPTH
     }
 
     get value ():T|undefined {
@@ -19,7 +21,7 @@ export class Sign<T=any|undefined> {
             subscriptions.add(subscriber)
         }
         this._recursion++
-        if (this._recursion > Sign.MAX_DEPTH) {
+        if (this._recursion > this.MAX_DEPTH) {
             throw CycleError
         }
         // setTimeout(() => {
