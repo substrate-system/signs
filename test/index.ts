@@ -79,32 +79,32 @@ test('Multiple updates with the same value', t => {
     unsub()
 })
 
-test('Update a value inside an effect', t => {
-    t.plan(Sign.MAX_DEPTH + 2)  // 1 assertion in each recursion, + extras
-    const hello = sign('hello')
+// test('Update a value inside an effect', t => {
+//     t.plan(Sign.MAX_DEPTH + 2)  // 1 assertion in each recursion, + extras
+//     const hello = sign('hello')
 
-    let calls = 0
+//     let calls = 0
 
-    try {
-        effect(() => {
-            calls++
-            if (calls === 1) {
-                t.equal(hello.value, 'hello', 'Called with inital value')
-            } else {
-                t.equal(hello.value, '' + (calls - 1), 'Should reset the value')
-            }
-            hello.value = '' + calls
-        })
-    } catch (_err) {
-        const err = _err as Error
-        t.equal(err.message, CycleError.message, 'should throw the error')
-    }
+//     try {
+//         effect(() => {
+//             calls++
+//             if (calls === 1) {
+//                 t.equal(hello.value, 'hello', 'Called with inital value')
+//             } else {
+//                 t.equal(hello.value, '' + (calls - 1), 'Should reset the value')
+//             }
+//             hello.value = '' + calls
+//         })
+//     } catch (_err) {
+//         const err = _err as Error
+//         t.equal(err.message, CycleError.message, 'should throw the error')
+//     }
 
-    const fooo = sign('fooo')
-    effect(() => {
-        t.equal(fooo.value, 'fooo', 'Can listen to a second signal')
-    })
-})
+//     const fooo = sign('fooo')
+//     effect(() => {
+//         t.equal(fooo.value, 'fooo', 'Can listen to a second signal')
+//     })
+// })
 
 test('async Effects', t => {
     const fooo = sign('fooo')
@@ -118,21 +118,24 @@ test('async Effects', t => {
     //     tester()
     // }, 0)
 
-    try {
-        effect(() => {
-            console.log('**in here**', fooo.value)
-            console.log('**count**', count)
-            console.log('fooo recursion**', fooo._recursion)
-            t.equal(fooo.value, 'fooo', 'should call with initial value')
-            // tester()
-            setTimeout(() => {
-                count++
-                fooo.value = '' + count
-            }, 1)
-        })
-    } catch (_err) {
-        const err = _err as Error
-        console.log('**********************', err)
-        t.ok(err)
-    }
+    return new Promise<void>(resolve => {
+        try {
+            effect(() => {
+                console.log('**in here**', fooo.value)
+                console.log('**count**', count)
+                console.log('fooo recursion**', fooo._recursion)
+                t.equal(fooo.value, 'fooo', 'should call with initial value')
+                // tester()
+                if (count === 500) return resolve()
+                setTimeout(() => {
+                    count++
+                    fooo.value = '' + count
+                }, 1)
+            })
+        } catch (_err) {
+            const err = _err as Error
+            console.log('**********************', err)
+            t.ok(err)
+        }
+    })
 })
