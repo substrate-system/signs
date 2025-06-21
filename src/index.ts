@@ -22,14 +22,17 @@ export class Sign<T=any|undefined> {
         if (this._recursion > Sign.MAX_DEPTH) {
             throw CycleError
         }
+        // setTimeout(() => {
+        //     this._recursion = 0
+        // }, 0)
         return this._value
     }
 
     set value (newValue:T) {
-        // if (newValue !== this._value) {
-        this._value = newValue
-        subscriptions.forEach(fn => fn())
-        // }
+        if (newValue !== this._value) {
+            this._value = newValue
+            subscriptions.forEach(fn => fn())
+        }
     }
 }
 

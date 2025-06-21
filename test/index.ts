@@ -65,14 +65,22 @@ test('A nested effect', t => {
     unsub()
 })
 
-// test('test', t => {
-//     t.plan(2)
-//     t.ok(true)
-// })
+test('Multiple updates with the same value', t => {
+    t.plan(1)
+    const hello = sign('hello')
+    const unsub = effect(() => {
+        console.log('hello.value', hello.value)
+        t.equal(hello.value, 'hello', 'should call the subscription once')
+    })
+
+    hello.value = 'hello'
+    hello.value = 'hello'
+
+    unsub()
+})
 
 test('Update a value inside an effect', t => {
-    t.plan(Sign.MAX_DEPTH + 1)  // 1 assertion in each recursion, + throws
-    // t.plan(2)
+    t.plan(Sign.MAX_DEPTH + 2)  // 1 assertion in each recursion, + extras
     const hello = sign('hello')
 
     let calls = 0
@@ -92,21 +100,31 @@ test('Update a value inside an effect', t => {
         t.equal(err.message, CycleError.message, 'should throw the error')
     }
 
-    // t.throws(() => {
-    //     // unsub = effect(() => {
-    // }, CycleError.message, 'should throw an error')
-
-    // unsub()
-
-    // this then throws the error for real
-    // hello.value = '123'
+    const fooo = sign('fooo')
+    effect(() => {
+        t.equal(fooo.value, 'fooo', 'Can listen to a second signal')
+    })
 })
 
-// test('test', t => {
-//     t.plan(2)
-//     t.ok(true)
-// })
+test('async Effects', t => {
+    const fooo = sign('fooo')
 
-// test('computed', t => {
-//     // todo
-// })
+    let count = 0
+    // const tester = () => setTimeout(() => {
+    //     console.log('count', count)
+    //     count++
+    //     fooo.value = '' + count
+    //     console.log('foo value', fooo.value)
+    //     tester()
+    // }, 0)
+
+    effect(() => {
+        console.log('in here', fooo.value)
+        t.equal(fooo.value, 'fooo', 'should call with initial value')
+        // tester()
+        setTimeout(() => {
+            count++
+            fooo.value = '' + count
+        }, 1)
+    })
+})
