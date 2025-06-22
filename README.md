@@ -136,7 +136,8 @@ function effect (fn:()=>any):()=>void
 ```js
 const { sign, effect } = create('hello')
 
-// this only gets called once
+// this only gets called once,
+// because the second update has the same value.
 effect(() => {
     console.log(sign.value)
     // => 'hello'
@@ -145,7 +146,36 @@ effect(() => {
 sign.value = 'hello'
 ```
 
+#### errors
+
+This will throw a `CycleError` if you update the signal from within the effect
+function.
+
+By default the stack size is 100. If an effect synchronously runs more than 100
+times, it throws.
+
+You can set a different size by passing in a second argument to `create`.
+
+```js
+let calls = 0
+
+const { sign, effect } = create('hello', {
+    maxDepth: 50
+})
+
+// don't do this
+// it will throw
+effect(() => {
+    console.log(sign.value)
+
+    calls++
+    sign.value = '' + calls
+})
+```
+
+
 #### `effect` example
+
 ```js
 import { create } from '@substrate-system/signs'
 const { sign, effect } = create('hello')
@@ -153,11 +183,20 @@ const { sign, effect } = create('hello')
 effect(() => {
     console.log(sign.value)
     // => 'hello'
+    // => 'hello again'
 })
 
-// these updates trigget the effect function.
-
+// these updates trigger the effect function.
 sign.value = 'hello again'
+```
+
+### `computed`
+
+Create a new signal that is derived from another signal. Any effects will be
+updated whenver the original signal changes.
+
+```ts
+function computed<T=any> (fn:()=>T):Sign<T>
 ```
 
 

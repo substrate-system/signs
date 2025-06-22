@@ -174,7 +174,7 @@ test('can pass in the max recursion depth', t => {
     const { sign: hello, effect } = create('hello', {
         maxDepth: 50
     })
-    t.equal(hello.value, 'hello', 'sanify')
+    t.equal(hello.value, 'hello', 'sanity')
 
     let calls = 0
 
