@@ -12,7 +12,12 @@
 
 A smaller, simpler [signals](https://github.com/tc39/proposal-signals).
 
-[See a the typescript docs](https://substrate-system.github.io/signs/)
+This is not as magical or robust as other implementations, but it is very small.
+Look at [alien-signals](https://github.com/stackblitz/alien-signals) or
+[preactjs/signals](https://github.com/preactjs/signals) if you need more
+magic or functionality.
+
+[See the typescript docs](https://substrate-system.github.io/signs/).
 
 <details><summary><h2>Contents</h2></summary>
 <!-- toc -->
@@ -54,6 +59,14 @@ cp ./node_modules/@substrate-system/signs/dist/index.min.js ./public/signs.min.j
 
 ## Example
 
+The clever part is how the `effect`s are handled. We pass in a function, and
+because the function accesses a signal's `.value`, the signal adds it
+to `subscriptions`.
+
+When you call `create('value')`, it creates a closure around the signal and
+the `effect` function, and that's how the signal knows which effects
+to call.
+
 ```js
 import { create } from '@substrate-system/signs'
 
@@ -71,6 +84,67 @@ effect(() => {
 
 sign.value = 'hi'
 ```
+
+## API
+
+### `create (value, opts)`
+
+Create a new instance. Will return a sign instance, effect function, and
+computed function.
+
+```ts
+export function create<T=any|undefined> (value?:T, opts:{
+    maxDepth?:number
+} = {}):{
+    sign:Sign<T>;
+    effect:(cb:()=>any)=>(()=>void);
+    computed:(fn:()=>T)=>Sign<T>;
+}
+```
+
+### `effect (fn)`
+
+Subscribe to a sign by accessing its value within the callback function.
+Effects are where you consume a 'sign'. It could be at the end of a chain of
+computed signs.
+
+It returns a function that will unsubscribe.
+
+```ts
+function effect (fn:()=>any):()=>void
+```
+
+> [!NOTE]  
+> The `effect` function will automatically filter out multiple calls with the
+> same value, using a `===` comparison.
+
+```js
+const { sign, effect } = create('hello')
+
+// this only gets called once
+effect(() => {
+    console.log(sign.value)
+    // => 'hello'
+})
+
+sign.value = 'hello'
+```
+
+#### `effect` example
+```js
+import { create } from '@substrate-system/signs'
+const { sign, effect } = create('hello')
+
+effect(() => {
+    console.log(sign.value)
+    // => 'hello'
+})
+
+// these updates trigget the effect function.
+
+sign.value = 'hello again'
+```
+
 
 ## See also
 
