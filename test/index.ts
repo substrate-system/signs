@@ -1,11 +1,9 @@
 import { test } from '@substrate-system/tapzero'
-import { sign as create, CycleError } from '../src/index.js'
+import { Sign, create, CycleError } from '../src/index.js'
 
 test('create a signal', async t => {
     t.plan(2)
-    const { sign } = create()
-    console.log('**sign**', sign)
-    const hello = sign('hello')
+    const { sign: hello } = create('hello')
 
     t.equal(hello.value, 'hello', 'should return the value we passed in')
     hello.value = 'fooo'
@@ -14,13 +12,14 @@ test('create a signal', async t => {
 
 test('effect', (t) => {
     t.plan(2)
-    const { sign, effect } = create()
+    const { sign, effect } = create('hello')
 
-    const hello = sign('hello')
+    const hello = sign
     let calls = 0
     const unsub = effect(() => {
         calls++
         const value = hello.value
+        console.log('the value...', value)
         if (calls === 1) {
             t.equal(value, 'hello',
                 'should call the effect with the inital value')
@@ -40,8 +39,8 @@ test('effect', (t) => {
 
 test('A nested effect', t => {
     t.plan(4)
-    const { sign, effect } = create()
-    const hello = sign('hello')
+    const { sign, effect } = create('hello')
+    const hello = sign
 
     let calls = 0
     const unsub = effect(() => {
@@ -69,8 +68,7 @@ test('A nested effect', t => {
 
 test('Multiple updates with the same value', t => {
     t.plan(1)
-    const { sign, effect } = create()
-    const hello = sign('hello')
+    const { sign: hello, effect } = create('hello')
     const unsub = effect(() => {
         t.equal(hello.value, 'hello', 'should call the subscription once')
     })
@@ -85,9 +83,8 @@ test('Multiple updates with the same value', t => {
  * Should throw an error b/c stack overflow.
  */
 test('Update a value inside an effect', t => {
-    const { Sign, sign, effect } = create()
+    const { sign: hello, effect } = create('hello')
     t.plan(Sign.MAX_DEPTH + 2)  // 1 assertion in each recursion, + extras
-    const hello = sign('hello')
 
     let calls = 0
 
@@ -97,10 +94,6 @@ test('Update a value inside an effect', t => {
             if (calls === 1) {
                 t.equal(hello.value, 'hello', 'Called with inital value')
             } else {
-                // if you console log the .value in here, it breaks the test
-
-                // console.log('**hello value**', hello.value)
-                // console.log('**calls**', calls)
                 t.equal(hello.value, '' + (calls - 1), 'Should update the value')
             }
             hello.value = '' + calls
@@ -110,7 +103,7 @@ test('Update a value inside an effect', t => {
         t.equal(err.message, CycleError.message, 'should throw the error')
     }
 
-    const fooo = sign('fooo')
+    const fooo = create('fooo').sign
     effect(() => {
         t.equal(fooo.value, 'fooo', 'Can listen to a second signal')
     })
@@ -121,15 +114,14 @@ test('Update a value inside an effect', t => {
  */
 test('async Effects', async t => {
     t.plan(202)
-    const { sign, effect } = create()
-    const abc = sign('barrr')
+    const { sign: abc, effect } = create('barrr')
     let count = 0
 
     const p = new Promise<void>((resolve, reject) => {
         try {
             effect(() => {
                 t.ok(abc.value)
-                if (count === 200) return resolve()
+                if (count === 200) return resolve()  // default limit is 100
                 setTimeout(() => {
                     count++
                     abc.value = '' + count
@@ -144,5 +136,6 @@ test('async Effects', async t => {
 
     await p
 
-    t.equal(abc.value, '200', 'should update, not throw')
+    t.equal(abc.value, '200',
+        'should update, not throw, b/c this is an async loop, not recursive stack')
 })
