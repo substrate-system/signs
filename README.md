@@ -153,7 +153,7 @@ This will throw a `CycleError` if you update the signal from within the effect
 function.
 
 By default the stack size is 100. If an effect synchronously runs more than 100
-times, it throws.
+times, it will throw.
 
 You can set a different size by passing in a second argument to `create`.
 
