@@ -9,7 +9,7 @@
 [![license](https://img.shields.io/badge/license-Big_Time-blue?style=flat-square)](LICENSE)
 
 
-A smaller, simpler [signal](https://github.com/tc39/proposal-signals).
+A smaller, simpler [signals](https://github.com/tc39/proposal-signals).
 
 [See a the typescript docs](https://substrate-system.github.io/signs/)
 
@@ -29,20 +29,12 @@ This exposes ESM and common JS via [package.json `exports` field](https://nodejs
 
 ### ESM
 ```js
-import '@substrate-system/signs'
+import { Sign, create, CycleError } from '@substrate-system/signs'
 ```
 
 ### Common JS
 ```js
 const signs = require('@substrate-system/signs')
-```
-
-## Use
-
-```js
-import { sign } from '@substrate-system/signs'
-
-
 ```
 
 ### pre-built JS
@@ -58,3 +50,30 @@ cp ./node_modules/@substrate-system/signs/dist/index.min.js ./public/signs.min.j
 ```html
 <script type="module" src="./signs.min.js"></script>
 ```
+
+## Example
+
+```js
+import { create } from '@substrate-system/signs'
+
+const { sign, effect } = create('hello')
+
+constole.log(sign.value)
+// => 'hello'
+
+// subscribe
+effect(() => {
+    console.log(sign.value)
+    // 'hello'
+    // 'hi'
+})
+
+sign.value = 'hi'
+```
+
+## See also
+
+* [alien-signals](https://github.com/stackblitz/alien-signals)
+* [Ryan K Carniato - Revolutionary Signals](https://youtu.be/Jp7QBjY5K34)
+* [Learn Why JavaScript Frameworks Love Signals By Implementing Them](https://youtu.be/1TSLEzNzGQM)
+* [preactjs.com -- Signals](https://preactjs.com/guide/v10/signals/)
