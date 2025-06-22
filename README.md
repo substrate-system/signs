@@ -121,7 +121,7 @@ export function create<T=any|undefined> (value?:T, opts:{
 ### `effect (fn)`
 
 Subscribe to a sign by accessing its value within the callback function.
-Effects are where you consume a 'sign'. It could be at the end of a chain of
+Effects are where you consume a sign. It could be at the end of a chain of
 computed signs.
 
 It returns a function that will unsubscribe.
