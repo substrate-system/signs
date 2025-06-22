@@ -32,6 +32,7 @@ magic or functionality.
 - [API](#api)
   * [`create (value, opts)`](#create-value-opts)
   * [`effect (fn)`](#effect-fn)
+  * [`computed`](#computed)
 - [See also](#see-also)
 
 <!-- tocstop -->
