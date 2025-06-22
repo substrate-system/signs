@@ -1,4 +1,4 @@
-# package name here
+# signs
 [![tests](https://img.shields.io/github/actions/workflow/status/substrate-system/signs/nodejs.yml?style=flat-square)](https://github.com/substrate-system/signs/actions/workflows/nodejs.yml)
 [![types](https://img.shields.io/npm/types/@substrate-system/signs?style=flat-square)](README.md)
 [![module](https://img.shields.io/badge/module-ESM%2FCJS-blue?style=flat-square)](README.md)
