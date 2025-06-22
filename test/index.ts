@@ -1,8 +1,10 @@
 import { test } from '@substrate-system/tapzero'
-import { Sign, sign, effect, CycleError } from '../src/index.js'
+import { sign as create, CycleError } from '../src/index.js'
 
 test('create a signal', async t => {
-    t.ok('ok', 'should be an example')
+    t.plan(2)
+    const { sign } = create()
+    console.log('**sign**', sign)
     const hello = sign('hello')
 
     t.equal(hello.value, 'hello', 'should return the value we passed in')
@@ -12,6 +14,8 @@ test('create a signal', async t => {
 
 test('effect', (t) => {
     t.plan(2)
+    const { sign, effect } = create()
+
     const hello = sign('hello')
     let calls = 0
     const unsub = effect(() => {
@@ -35,6 +39,8 @@ test('effect', (t) => {
 })
 
 test('A nested effect', t => {
+    t.plan(4)
+    const { sign, effect } = create()
     const hello = sign('hello')
 
     let calls = 0
@@ -48,13 +54,9 @@ test('A nested effect', t => {
 
         const unsub = effect(() => {
             if (calls === 1) {
-                console.log('hello.value', hello.value)
-            }
-
-            if (calls === 1) {
                 t.equal(hello.value, 'hello', 'nested effect works')
             } else {
-                t.equal(hello.value, 'hi', 'nested subscription subscription')
+                t.equal(hello.value, 'hi', 'nested subscription')
             }
         })
 
@@ -67,9 +69,9 @@ test('A nested effect', t => {
 
 test('Multiple updates with the same value', t => {
     t.plan(1)
+    const { sign, effect } = create()
     const hello = sign('hello')
     const unsub = effect(() => {
-        console.log('hello.value', hello.value)
         t.equal(hello.value, 'hello', 'should call the subscription once')
     })
 
@@ -79,7 +81,11 @@ test('Multiple updates with the same value', t => {
     unsub()
 })
 
+/**
+ * Should throw an error b/c stack overflow.
+ */
 test('Update a value inside an effect', t => {
+    const { Sign, sign, effect } = create()
     t.plan(Sign.MAX_DEPTH + 2)  // 1 assertion in each recursion, + extras
     const hello = sign('hello')
 
@@ -114,8 +120,9 @@ test('Update a value inside an effect', t => {
  * Should *not* throw the "cycle detected" error, because this is an async loop.
  */
 test('async Effects', async t => {
+    t.plan(202)
+    const { sign, effect } = create()
     const abc = sign('barrr')
-
     let count = 0
 
     const p = new Promise<void>((resolve, reject) => {
