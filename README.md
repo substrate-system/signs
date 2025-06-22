@@ -20,7 +20,22 @@ magic or functionality.
 [See the typescript docs](https://substrate-system.github.io/signs/).
 
 <details><summary><h2>Contents</h2></summary>
+
 <!-- toc -->
+
+- [Install](#install)
+- [Modules](#modules)
+  * [ESM](#esm)
+  * [Common JS](#common-js)
+  * [pre-built JS](#pre-built-js)
+- [Example](#example)
+- [API](#api)
+  * [`create (value, opts)`](#create-value-opts)
+  * [`effect (fn)`](#effect-fn)
+- [See also](#see-also)
+
+<!-- tocstop -->
+
 </details>
 
 ## Install
