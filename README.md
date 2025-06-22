@@ -194,7 +194,7 @@ sign.value = 'hello again'
 ### `computed`
 
 Create a new signal that is derived from another signal. Any effects will be
-updated whenver the original signal changes.
+updated when the original signal changes.
 
 ```ts
 function computed<T=any> (fn:()=>T):Sign<T>
