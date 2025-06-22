@@ -7,7 +7,7 @@ test('create a signal', async t => {
 
     t.equal(hello.value, 'hello', 'should return the value we passed in')
     hello.value = 'fooo'
-    t.equal(hello.value, 'fooo', 'should reset the value')
+    t.equal(hello.value, 'fooo', 'should update the value')
 })
 
 test('effect', (t) => {
@@ -79,63 +79,63 @@ test('Multiple updates with the same value', t => {
     unsub()
 })
 
-// test('Update a value inside an effect', t => {
-//     t.plan(Sign.MAX_DEPTH + 2)  // 1 assertion in each recursion, + extras
-//     const hello = sign('hello')
+test('Update a value inside an effect', t => {
+    t.plan(Sign.MAX_DEPTH + 2)  // 1 assertion in each recursion, + extras
+    const hello = sign('hello')
 
-//     let calls = 0
+    let calls = 0
 
-//     try {
-//         effect(() => {
-//             calls++
-//             if (calls === 1) {
-//                 t.equal(hello.value, 'hello', 'Called with inital value')
-//             } else {
-//                 t.equal(hello.value, '' + (calls - 1), 'Should reset the value')
-//             }
-//             hello.value = '' + calls
-//         })
-//     } catch (_err) {
-//         const err = _err as Error
-//         t.equal(err.message, CycleError.message, 'should throw the error')
-//     }
+    try {
+        effect(() => {
+            calls++
+            if (calls === 1) {
+                t.equal(hello.value, 'hello', 'Called with inital value')
+            } else {
+                // if you console log the .value in here, it breaks the test
 
-//     const fooo = sign('fooo')
-//     effect(() => {
-//         t.equal(fooo.value, 'fooo', 'Can listen to a second signal')
-//     })
-// })
+                // console.log('**hello value**', hello.value)
+                // console.log('**calls**', calls)
+                t.equal(hello.value, '' + (calls - 1), 'Should update the value')
+            }
+            hello.value = '' + calls
+        })
+    } catch (_err) {
+        const err = _err as Error
+        t.equal(err.message, CycleError.message, 'should throw the error')
+    }
 
-test('async Effects', t => {
     const fooo = sign('fooo')
+    effect(() => {
+        t.equal(fooo.value, 'fooo', 'Can listen to a second signal')
+    })
+})
+
+/**
+ * Should *not* throw the "cycle detected" error, because this is an async loop.
+ */
+test('async Effects', async t => {
+    const abc = sign('barrr')
 
     let count = 0
-    // const tester = () => setTimeout(() => {
-    //     console.log('count', count)
-    //     count++
-    //     fooo.value = '' + count
-    //     console.log('foo value', fooo.value)
-    //     tester()
-    // }, 0)
 
-    return new Promise<void>(resolve => {
+    const p = new Promise<void>((resolve, reject) => {
         try {
             effect(() => {
-                console.log('**in here**', fooo.value)
-                console.log('**count**', count)
-                console.log('fooo recursion**', fooo._recursion)
-                // t.equal(fooo.value, 'fooo', 'should call with initial value')
-                // tester()
-                if (count === 500) return resolve()
+                t.ok(abc.value)
+                if (count === 200) return resolve()
                 setTimeout(() => {
                     count++
-                    fooo.value = '' + count
+                    abc.value = '' + count
                 }, 1)
             })
         } catch (_err) {
             const err = _err as Error
-            console.log('**********************', err)
-            t.ok(err)
+            console.log('**error**', err)
+            reject(err)
         }
     })
+
+    await p
+
+    t.equal(abc.value, '200', 'should update, not throw')
 })

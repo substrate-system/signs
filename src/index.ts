@@ -21,12 +21,12 @@ export class Sign<T=any|undefined> {
             subscriptions.add(subscriber)
         }
         this._recursion++
-        // if (this._recursion > this.MAX_DEPTH) {
-        //     throw CycleError
-        // }
-        // setTimeout(() => {
-        //     this._recursion = 0
-        // }, 0)
+        if (this._recursion > this.MAX_DEPTH) {
+            throw CycleError
+        }
+        setTimeout(() => {
+            this._recursion = 0
+        }, 0)
         return this._value
     }
 
