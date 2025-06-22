@@ -139,3 +139,33 @@ test('async Effects', async t => {
     t.equal(abc.value, '200',
         'should update, not throw, b/c this is an async loop, not recursive stack')
 })
+
+let hello
+let bonusGreeting
+let effect
+test('computed', t => {
+    const { sign: _hello, computed, effect: _effect } = create('hello')
+    hello = _hello
+    effect = _effect
+    t.ok(hello, 'create a signal')
+
+    bonusGreeting = computed(() => {
+        return hello.value + ', hi...'
+    })
+
+    t.ok(bonusGreeting instanceof Sign, 'should return a new Sign')
+
+    hello.value = 'hello, world'
+
+    t.equal(bonusGreeting.value, 'hello, world, hi...',
+        'computed signal should update when the original updates')
+})
+
+test('subscribe to a computed signal', t => {
+    hello.value = 'hello again'
+
+    effect(() => {
+        t.equal(bonusGreeting.value, 'hello again, hi...',
+            'can subscribe via effect')
+    })
+})

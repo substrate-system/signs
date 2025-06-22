@@ -1,8 +1,12 @@
 {
+  "name": "@substrate-system/signs",
+  "description": "Smaller, simpler signals",
   "type": "module",
-  "private": true,
   "version": "0.0.0",
   "main": "dist/index.js",
+  "directories": {
+    "test": "test"
+  },
   "files": [
     "./dist/*"
   ],
@@ -16,9 +20,9 @@
   "scripts": {
     "lint": "eslint \"./**/*.{ts,js}\"",
     "test": "esbuild test/index.ts --platform=node --sourcemap --format=esm --bundle --keep-names | node --input-type=module",
-    "test:build": "esbuild test/index.ts --platform=node --sourcemap --format=esm --keep-names --bundle --outdir=./test && node ./test/index.js",
     "build-esm": "esbuild src/*.ts --format=esm --metafile=dist/meta.json --keep-names --tsconfig=tsconfig.build.json --outdir=./dist --sourcemap && tsc --emitDeclarationOnly --project tsconfig.build.json --outDir dist",
     "build": "mkdir -p ./dist && rm -rf ./dist/* && npm run build-esm",
+    "build-docs": "typedoc ./src/index.ts",
     "toc": "markdown-toc --maxdepth 3 -i README.md",
     "preversion": "npm run lint",
     "version": "npm run toc && auto-changelog -p --template keepachangelog --breaking-pattern 'BREAKING CHANGE:' && git add CHANGELOG.md README.md",
@@ -37,8 +41,21 @@
     "eslint-config-standard": "^17.1.0",
     "markdown-toc": "^1.2.0",
     "tap-spec": "^5.0.0",
+    "typedoc": "^0.28.5",
     "typescript": "^5.7.2"
   },
-  "license": "SEE LICENSE IN LICENSE",
-  "author": "nichoth <nichoth@gmail.com> (https://nichoth.com)"
+  "author": "nichoth <nichoth@gmail.com> (https://nichoth.com)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/substrate-system/signs.git"
+  },
+  "keywords": [
+    "signal"
+  ],
+  "types": "./dist/index.d.ts",
+  "bugs": {
+    "url": "https://github.com/substrate-system/signs/issues"
+  },
+  "homepage": "https://github.com/substrate-system/signs",
+  "license": "SEE LICENSE IN LICENSE"
 }
