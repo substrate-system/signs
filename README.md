@@ -1,10 +1,11 @@
 # package name here
-![tests](https://github.com/substrate-system/signs/actions/workflows/nodejs.yml/badge.svg)
+[![tests](https://img.shields.io/github/actions/workflow/status/substrate-system/signs/nodejs.yml?style=flat-square)](https://github.com/substrate-system/signs/actions/workflows/nodejs.yml)
 [![types](https://img.shields.io/npm/types/@substrate-system/signs?style=flat-square)](README.md)
 [![module](https://img.shields.io/badge/module-ESM%2FCJS-blue?style=flat-square)](README.md)
 [![semantic versioning](https://img.shields.io/badge/semver-2.0.0-blue?logo=semver&style=flat-square)](https://semver.org/)
 [![Common Changelog](https://nichoth.github.io/badge/common-changelog.svg)](./CHANGELOG.md)
-[![install size](https://flat.badgen.net/packagephobia/install/@substrate-system/signs)](https://packagephobia.com/result?p=@substrate-system/signs)
+[![install size](https://flat.badgen.net/packagephobia/install/@substrate-system/signs?)](https://packagephobia.com/result?p=@substrate-system/signs)
+[![GZip size](https://flat.badgen.net/bundlephobia/minzip/@substrate-system/signs?color=green)](https://bundlephobia.com/package/@substrate-system/signs)
 [![dependencies](https://img.shields.io/badge/dependencies-zero-brightgreen.svg?style=flat-square)](package.json)
 [![license](https://img.shields.io/badge/license-Big_Time-blue?style=flat-square)](LICENSE)
 
