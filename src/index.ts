@@ -9,11 +9,13 @@ export class Sign<T=any|undefined> {
     _subscriptions:Set<()=>any>
     MAX_DEPTH:number
 
-    constructor (value?:T) {
+    constructor (value?:T, opts?:{
+        maxDepth?:number
+    }) {
         this._recursion = 0
         this._subscriber = null
         this._value = value
-        this.MAX_DEPTH = Sign.MAX_DEPTH
+        this.MAX_DEPTH = opts?.maxDepth || Sign.MAX_DEPTH
         this._subscriptions = new Set()
     }
 
@@ -43,12 +45,15 @@ export class Sign<T=any|undefined> {
 /**
  * Create a new sign
  */
-export function create<T=any|undefined> (value?:T):{
+export function create<T=any|undefined> (value?:T, opts:{
+    maxDepth?:number
+} = {}):{
     sign:Sign<T>;
     effect:(cb:()=>any)=>(()=>void);
     computed:(fn:()=>T)=>Sign<T>;
 } {
-    const signal = new Sign<T>(value)
+    const maxDepth = opts?.maxDepth
+    const signal = new Sign<T>(value, { maxDepth })
 
     /**
      * Add a new listener.

@@ -169,3 +169,28 @@ test('subscribe to a computed signal', t => {
             'can subscribe via effect')
     })
 })
+
+test('can pass in the max recursion depth', t => {
+    const { sign: hello, effect } = create('hello', {
+        maxDepth: 50
+    })
+    t.equal(hello.value, 'hello', 'sanify')
+
+    let calls = 0
+
+    try {
+        effect(() => {
+            calls++
+            if (calls === 1) {
+                t.equal(hello.value, 'hello', 'Called with inital value')
+            } else {
+                t.equal(hello.value, '' + (calls - 1), 'Should update the value')
+            }
+            hello.value = '' + calls
+        })
+    } catch (_err) {
+        const err = _err as Error
+        t.equal(err.message, CycleError.message, 'should throw the error')
+        t.equal(calls, 50, 'should set the max recursion depth')
+    }
+})
