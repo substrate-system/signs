@@ -10,16 +10,15 @@ test('create a signal', async t => {
     t.equal(hello.value, 'fooo', 'should update the value')
 })
 
-test('effect', (t) => {
+test('effect', async (t) => {
     t.plan(2)
     const { sign, effect } = create('hello')
 
     const hello = sign
     let calls = 0
-    const unsub = effect(() => {
+    const unsub = await effect(() => {
         calls++
         const value = hello.value
-        console.log('the value...', value)
         if (calls === 1) {
             t.equal(value, 'hello',
                 'should call the effect with the inital value')
@@ -37,13 +36,13 @@ test('effect', (t) => {
     }, 1)
 })
 
-test('A nested effect', t => {
+test('A nested effect', async t => {
     t.plan(4)
     const { sign, effect } = create('hello')
     const hello = sign
 
     let calls = 0
-    const unsub = effect(() => {
+    const unsub = await effect(async () => {
         calls++
         if (calls === 1) {
             t.equal(hello.value, 'hello', 'top level effect')
@@ -51,7 +50,7 @@ test('A nested effect', t => {
             t.equal(hello.value, 'hi', 'top level subscription')
         }
 
-        const unsub = effect(() => {
+        const unsub = await effect(() => {
             if (calls === 1) {
                 t.equal(hello.value, 'hello', 'nested effect works')
             } else {
@@ -66,10 +65,10 @@ test('A nested effect', t => {
     unsub()
 })
 
-test('Multiple updates with the same value', t => {
+test('Multiple updates with the same value', async t => {
     t.plan(1)
     const { sign: hello, effect } = create('hello')
-    const unsub = effect(() => {
+    const unsub = await effect(() => {
         t.equal(hello.value, 'hello', 'should call the subscription once')
     })
 

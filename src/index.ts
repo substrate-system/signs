@@ -49,7 +49,7 @@ export function create<T=any|undefined> (value?:T, opts:{
     maxDepth?:number
 } = {}):{
     sign:Sign<T>;
-    effect:(cb:()=>any)=>(()=>void);
+    effect:(cb:()=>Promise<any>|any)=>Promise<()=>void>;
     computed:(fn:()=>T)=>Sign<T>;
 } {
     const maxDepth = opts?.maxDepth
@@ -60,7 +60,7 @@ export function create<T=any|undefined> (value?:T, opts:{
      *
      * @returns A function that will unsubscribe.
      */
-    function effect (fn:()=>any):()=>void {
+    async function effect (fn:(()=>Promise<any>)|(()=>any)):Promise<(()=>void)> {
         // this is the clever part
         // because the `fn` accesses a signal's .value,
         // the signal adds it to `subscriptions`.
@@ -68,7 +68,10 @@ export function create<T=any|undefined> (value?:T, opts:{
         // function has a closure around its signal.
 
         signal._subscriber = fn
-        fn()
+        const result = fn()
+        if (result && result.then) {
+            await result
+        }
         signal._subscriber = null
 
         return () => {
@@ -80,10 +83,15 @@ export function create<T=any|undefined> (value?:T, opts:{
     // so when the `fn` accesses the value, it subscribes,
     // and the new signal we create in here gets updated whenver the original
     // signal gets updated
-    function computed<T=any> (fn:()=>T):Sign<T> {
+    function computed<T=any> (fn:(()=>Promise<T>)|(()=>T)):Sign<T> {
         const derived = create<T>().sign
-        effect(() => {
-            derived.value = fn()
+        effect(async () => {
+            const value = fn()
+            if (value instanceof Promise) {
+                derived.value = await value
+            } else {
+                derived.value = value
+            }
         })
         return derived
     }
