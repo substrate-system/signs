@@ -88,7 +88,7 @@ import { create } from '@substrate-system/signs'
 
 const { sign, effect } = create('hello')
 
-constole.log(sign.value)
+console.log(sign.value)
 // => 'hello'
 
 // subscribe
