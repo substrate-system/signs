@@ -14,7 +14,7 @@ A smaller, simpler [signals](https://github.com/tc39/proposal-signals).
 
 This is not as magical or robust as other implementations, but it is very small.
 Look at [alien-signals](https://github.com/stackblitz/alien-signals) or
-[preactjs/signals](https://github.com/preactjs/signals) if you need more
+[@preact/signals](https://github.com/preactjs/signals) if you need more
 magic or functionality.
 
 [See the typescript docs](https://substrate-system.github.io/signs/).
