@@ -80,8 +80,7 @@ because the function accesses a signal's `.value`, the signal adds it
 to `subscriptions`.
 
 When you call `create('value')`, it creates a closure around the signal and
-the `effect` function, and that's how the signal knows which effects
-to call.
+the `effect` function, so there is not a global stack for effect functions.
 
 ```js
 import { create } from '@substrate-system/signs'
