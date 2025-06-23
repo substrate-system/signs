@@ -58,7 +58,7 @@ export function create<T=any|undefined> (value?:T, opts:{
     /**
      * Add a new listener.
      *
-     * @returns A function that will unsubscribe the effect.
+     * @returns A function that will unsubscribe.
      */
     function effect (fn:()=>any):()=>void {
         // this is the clever part
