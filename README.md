@@ -50,7 +50,7 @@ npm i -S @substrate-system/signs
 This exposes ESM and common JS via [package.json `exports` field](https://nodejs.org/api/packages.html#exports).
 
 ### ESM
-```js
+```ts
 import { create, type Sign, type CycleError } from '@substrate-system/signs'
 ```
 
