@@ -51,7 +51,7 @@ This exposes ESM and common JS via [package.json `exports` field](https://nodejs
 
 ### ESM
 ```js
-import { Sign, create, CycleError } from '@substrate-system/signs'
+import { create, type Sign, type CycleError } from '@substrate-system/signs'
 ```
 
 ### Common JS
