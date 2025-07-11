@@ -1,6 +1,6 @@
 export const CycleError = new Error('Cycle detected')
 
-export class Sign<T=any|undefined> {
+export class _Sign<T=any|undefined> {
     static MAX_DEPTH = 100
 
     _value?:T
@@ -15,7 +15,7 @@ export class Sign<T=any|undefined> {
         this._recursion = 0
         this._subscriber = null
         this._value = value
-        this.MAX_DEPTH = opts?.maxDepth || Sign.MAX_DEPTH
+        this.MAX_DEPTH = opts?.maxDepth || _Sign.MAX_DEPTH
         this._subscriptions = new Set()
     }
 
@@ -42,13 +42,23 @@ export class Sign<T=any|undefined> {
     }
 }
 
+/** @global */
 let _subscriber:null|(()=>any) = null
+/** @global */
 const _subscriptions = new Set<()=>any>()
 
 /**
  * The given `fn` has a closure around a sign.
+ *
+ * This is the clever part. In the getter for `.value` on a Sign,
+ * we add the effect function to a global set of subscriptions. Since the effect
+ * calls `.value` on a sign, it is added to the list, then called any time
+ * se use the `.value` setter.
+ *
+ * @param fn Function that calls a `sign.value`.
+ * @returns A function that will unsubscribe.
  */
-export function effect (fn:()=>any) {
+export function effect (fn:()=>any):()=>void {
     _subscriber = fn
     fn()
     _subscriber = null
@@ -64,12 +74,25 @@ export function computed<T=any> (fn:()=>T):ReturnType<typeof sign<T>> {
     return derived
 }
 
-export function sign<T=any> (value?:T):({ value }) {
+export type Sign<T> = {
+    value:T
+}
+
+export function sign<T> (value?:T, opts:{ maxDepth?:number } = {}):({ value }) {
+    const MAX_DEPTH = opts.maxDepth || 100
+    let _recursion = 0
+
     return {
         get value ():T|undefined {
             if (_subscriber) {
                 _subscriptions.add(_subscriber)
             }
+
+            _recursion++
+            if (_recursion > MAX_DEPTH) {
+                throw CycleError
+            }
+
             return value
         },
 
