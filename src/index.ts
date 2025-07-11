@@ -42,51 +42,90 @@ export class Sign<T=any|undefined> {
     }
 }
 
+let _subscriber:null|(()=>any) = null
+const _subscriptions = new Set<()=>any>()
+
 /**
- * Create a new sign
+ * The given `fn` has a closure around a sign.
  */
-export function create<T=any|undefined> (value?:T, opts:{
-    maxDepth?:number
-} = {}):{
-    sign:Sign<T>;
-    effect:(cb:()=>any)=>(()=>void);
-    computed:(fn:()=>T)=>Sign<T>;
-} {
-    const maxDepth = opts?.maxDepth
-    const signal = new Sign<T>(value, { maxDepth })
+export function effect (fn:()=>any) {
+    _subscriber = fn
+    fn()
+    _subscriber = null
+    return _subscriptions.delete.bind(_subscriptions, fn)
+}
 
-    /**
-     * Add a new listener.
-     *
-     * @returns A function that will unsubscribe.
-     */
-    function effect (fn:()=>any):()=>void {
-        // this is the clever part
-        // because the `fn` accesses a signal's .value,
-        // the signal adds it to `subscriptions`.
-        // So in here we don't touch `subsroptions`, we assume that the given
-        // function has a closure around its signal.
+export function computed<T=any> (fn:()=>T):ReturnType<typeof sign<T>> {
+    const derived = sign<T>()
+    effect(() => {
+        derived.value = derived.value = fn()
+    })
 
-        signal._subscriber = fn
-        fn()
-        signal._subscriber = null
+    return derived
+}
 
-        return () => {
-            signal._subscriptions.delete(fn)
+export function sign<T=any> (value?:T):({ value }) {
+    return {
+        get value ():T|undefined {
+            if (_subscriber) {
+                _subscriptions.add(_subscriber)
+            }
+            return value
+        },
+
+        set value (newValue:T) {
+            if (newValue === value) return
+            value = newValue
+            _subscriptions.forEach(fn => fn())
         }
     }
-
-    // assume the given function has a closure around a signal
-    // so when the `fn` accesses the value, it subscribes,
-    // and the new signal we create in here gets updated whenver the original
-    // signal gets updated
-    function computed<T=any> (fn:()=>T):Sign<T> {
-        const derived = create<T>().sign
-        effect(() => {
-            derived.value = fn()
-        })
-        return derived
-    }
-
-    return { sign: signal, effect, computed }
 }
+
+// /**
+//  * Create a new sign
+//  */
+// export function create<T=any|undefined> (value?:T, opts:{
+//     maxDepth?:number
+// } = {}):{
+//     sign:Sign<T>;
+//     effect:(cb:()=>any)=>(()=>void);
+//     computed:(fn:()=>T)=>Sign<T>;
+// } {
+//     const maxDepth = opts?.maxDepth
+//     const signal = new Sign<T>(value, { maxDepth })
+
+//     // assume the given function has a closure around a signal
+//     // so when the `fn` accesses the value, it subscribes,
+//     // and the new signal we create in here gets updated whenver the original
+//     // signal gets updated
+//     function computed<T=any> (fn:()=>T):Sign<T> {
+//         const derived = create<T>().sign
+//         effect(() => {
+//             derived.value = fn()
+//         })
+//         return derived
+//     }
+
+//     return { sign: signal, effect, computed }
+// }
+
+// /**
+//  * Add a new listener.
+//  *
+//  * @returns A function that will unsubscribe.
+//  */
+// export function effect (fn:()=>any):()=>void {
+//     // this is the clever part
+//     // because the `fn` accesses a signal's .value,
+//     // the signal adds it to `subscriptions`.
+//     // So in here we don't need to touch `subsroptions`; we assume that the
+//     // given function has a closure around its signal.
+
+//     signal._subscriber = fn
+//     fn()
+//     signal._subscriber = null
+
+//     return () => {
+//         signal._subscriptions.delete(fn)
+//     }
+// }
