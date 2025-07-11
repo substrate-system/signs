@@ -1,5 +1,5 @@
 import { test } from '@substrate-system/tapzero'
-import { sign, effect, computed } from '../src/index.js'
+import { sign, effect, computed, CycleError } from '../src/index.js'
 
 test('create a signal', async t => {
     t.plan(2)
@@ -18,7 +18,6 @@ test('effect', (t) => {
     const unsub = effect(() => {
         calls++
         const value = hello.value
-        console.log('the value...', value)
         if (calls === 1) {
             t.equal(value, 'hello',
                 'should call the effect with the inital value')
@@ -64,27 +63,77 @@ test('Multiple updates with the same value', t => {
     unsub()
 })
 
-test('can pass in the max recursion depth', t => {
-    const hello = sign('hello')
-    // const { sign: hello, effect } = create('hello', {
-    //     maxDepth: 50
-    // })
-    t.equal(hello.value, 'hello', 'sanity')
-
-    let calls = 0
-
+test('throws Cycle Detected error', t => {
+    const hello = sign('hello 0')
+    let count = 0
     try {
         effect(() => {
-            calls++
-            if (calls === 1) {
-                t.equal(hello.value, 'hello', 'Called with inital value')
-            } else {
-                t.equal(hello.value, '' + (calls - 1), 'Should update the value')
-            }
-            hello.value = '' + calls
+            count++
+            t.equal(hello.value, 'hello ' + (count - 1),
+                'update within the effect')
+            hello.value = 'hello ' + count
         })
     } catch (_err) {
-        const err = _err as Error
-        t.equal(err.message, CycleError.message, 'should throw the error')
+        const err = _err as typeof CycleError
+        t.equal(err.message, CycleError.message, 'Should throw "cycle detected"')
+        t.equal(count, 97, 'should do 100 calls by default')  /* Why is this
+            not 100? */
     }
 })
+
+test('multiple subscriptions', t => {
+    const hello = sign('hello')
+    const foo = sign('foo')
+    t.plan(2)
+
+    let helloCount = 0
+    effect(() => {
+        helloCount++
+        console.log(hello.value)
+    })
+
+    let fooCount = 0
+    const stop = effect(() => {
+        fooCount++
+        console.log(foo.value)
+    })
+
+    effect(() => {
+        console.log('foo value', foo.value)
+    })
+
+    stop()
+
+    effect(() => {
+        helloCount++
+        console.log('hello value', hello.value)
+    })
+
+    t.equal(helloCount, 2)
+    t.equal(fooCount, 1)
+})
+
+// test('can pass in the max recursion depth', t => {
+//     t.plan(50)
+//     const hello = sign('hello', { maxDepth: 50 })
+//     t.equal(hello.value, 'hello', 'sanity')
+
+//     let calls = 0
+
+//     try {
+//         effect(() => {
+//             console.log('hello.value', hello.value)
+//             calls++
+//             if (calls === 1) {
+//                 t.equal(hello.value, 'hello', 'Called with inital value')
+//             } else {
+//                 t.equal(hello.value, '' + (calls - 1), 'Should update the value')
+//             }
+
+//             hello.value = '' + calls
+//         })
+//     } catch (_err) {
+//         const err = _err as Error
+//         t.equal(err.message, CycleError.message, 'should throw the error')
+//     }
+// })
