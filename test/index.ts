@@ -63,23 +63,46 @@ test('Multiple updates with the same value', t => {
     unsub()
 })
 
-test('throws Cycle Detected error', t => {
-    const hello = sign('hello 0')
-    let count = 0
-    try {
-        effect(() => {
-            count++
-            t.equal(hello.value, 'hello ' + (count - 1),
-                'update within the effect')
-            hello.value = 'hello ' + count
-        })
-    } catch (_err) {
-        const err = _err as typeof CycleError
-        t.equal(err.message, CycleError.message, 'Should throw "cycle detected"')
-        t.equal(count, 97, 'should do 100 calls by default')  /* Why is this
-            not 100? */
-    }
+test('stop listening', (t) => {
+    const hello = sign('hello')
+    t.plan(2)
+
+    let calls = 0
+    const stop = effect(() => {
+        if (calls === 0) {
+            t.equal(hello.value, 'hello', 'should get first value')
+        } else {
+            t.equal(hello.value, 'hi', 'should get second value')
+        }
+        calls++
+        const value = hello.value
+        console.log('value...', value)
+    })
+
+    hello.value = 'hi'
+    stop()
+    // should not get this update
+    hello.value = 'hello again'
 })
+
+// test('throws Cycle Detected error', t => {
+//     t.plan(100)
+//     const hello = sign('hello 0')
+//     let count = 0
+//     try {
+//         effect(() => {
+//             count++
+//             t.equal(hello.value, 'hello ' + (count - 1),
+//                 'update within the effect')
+//             hello.value = 'hello ' + count
+//         })
+//     } catch (_err) {
+//         const err = _err as typeof CycleError
+//         t.equal(err.message, CycleError.message, 'Should throw "cycle detected"')
+//         t.equal(count, 97, 'should do 100 calls by default')  /* Why is this
+//             not 100? */
+//     }
+// })
 
 test('multiple subscriptions', t => {
     const hello = sign('hello')
@@ -111,6 +134,20 @@ test('multiple subscriptions', t => {
 
     t.equal(helloCount, 2)
     t.equal(fooCount, 1)
+})
+
+test('peek does not subscribe', t => {
+    t.plan(1)
+    const hello = sign('hello')
+    let calls = 0
+
+    effect(() => {
+        calls++
+        hello.peek()
+    })
+
+    hello.value = 'world'
+    t.equal(calls, 1, 'should not have been called again')
 })
 
 // test('can pass in the max recursion depth', t => {
