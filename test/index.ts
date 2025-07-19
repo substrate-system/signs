@@ -150,7 +150,7 @@ test('peek does not subscribe', t => {
 })
 
 test('can pass in the max recursion depth', t => {
-    t.plan(53) // 1 sanity + 1 initial + 50 updates + 1 error message check
+    t.plan(53)  // 1 sanity + 1 initial + 50 updates + 1 error message check
     const hello = sign('hello', { maxDepth: 50 })
     t.equal(hello.value, 'hello', 'sanity')
 
@@ -171,4 +171,30 @@ test('can pass in the max recursion depth', t => {
         const err = _err as Error
         t.equal(err.message, CycleError.message, 'should throw the error')
     }
+})
+
+test('subscribe to two signals', t => {
+    t.plan(6)
+    const hello = sign('hello')
+    const foo = sign('foo')
+
+    let calls = 0
+    effect(() => {
+        calls++
+        if (calls === 1) {
+            t.equal(hello.value, 'hello')
+            t.equal(foo.value, 'foo', 'should call with initial state')
+        }
+        if (calls === 2) {
+            t.equal(hello.value, 'world')
+            t.equal(foo.value, 'foo', 'should update when any signal changes')
+        }
+        if (calls === 3) {
+            t.equal(hello.value, 'world')
+            t.equal(foo.value, 'bar', 'should update when any signal changes')
+        }
+    })
+
+    hello.value = 'world'
+    foo.value = 'bar'
 })
