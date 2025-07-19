@@ -5,12 +5,12 @@ let _globalMaxDepth = 100
 const DEFAULT_MAX_DEPTH = 100
 
 export type SignOptions = {
-    maxDepth?: number
+    maxDepth?:number
 }
 
 export type Sign<T> = {
     value:T
-    peek: ()=>T
+    peek:()=>T
 }
 
 export function sign<T> (value:T, options?: SignOptions):Sign<T> {

@@ -80,6 +80,78 @@ qs('button.plus').addEventListener('click', ev => {
 })
 ```
 
+## API
+
+### `sign`
+
+```ts
+function sign<T> (value:T, options?: SignOptions):Sign<T>
+```
+
+### `sign.peek`
+
+Get the sign's current value, but do not subscribe to that sign.
+
+```ts
+type Sign<T> = {
+    value:T
+    peek:()=>T
+}
+```
+
+#### `.peek` Example
+
+```js
+import { sign, effect } from '@substrate-system/signs'
+const delta = sign(0)
+const count = sign(0)
+
+effect(() => {
+    // Update `count` without subscribing to `count`:
+    count.value = count.peek() + delta.value;
+})
+
+// rerun the effect
+delta.value = 1
+
+// Do not rerun the effect,
+// b/c we used `.peek`, not `.value`
+count.value = 10
+```
+
+### `effect`
+
+Call the subscriber function any time the sign's value changes.
+
+```ts
+function effect (fn:()=>any):()=>void
+```
+
+### `computed`
+
+Create a new sign that will update whenever the root sign changes.
+
+```ts
+function computed<T> (fn:()=>T):Sign<T>
+```
+
+#### Example
+
+```js
+import { sign, computed } from '@substrate-system/signs'
+
+const hello = sign('hello')
+const derived = computed(() => {
+    return hello.value + ' world'
+})
+
+hello.value = 'goodbye'
+
+console.log('derived value', derived.value)
+// => 'goodbye world'
+```
+
+
 ## Modules
 
 This exposes ESM and common JS via [package.json `exports` field](https://nodejs.org/api/packages.html#exports).

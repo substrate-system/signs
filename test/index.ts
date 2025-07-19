@@ -136,17 +136,25 @@ test('multiple subscriptions', t => {
 })
 
 test('peek does not subscribe', t => {
-    t.plan(1)
-    const hello = sign('hello')
-    let calls = 0
+    t.plan(3)
+    const delta = sign(1)
+    const count = sign(0)
 
     effect(() => {
-        calls++
-        hello.peek()
+        // Update `count` without subscribing to `count`:
+        count.value = count.peek() + delta.value
     })
 
-    hello.value = 'world'
-    t.equal(calls, 1, 'should not have been called again')
+    t.equal(count.value, 1,
+        'should start 1 b/c delta is 1, and effect runs right away')
+
+    // run the effect
+    delta.value = 2
+    t.equal(count.value, 3, 'count should be 3 (2 + 1)')
+
+    // do not run the effect, b/c the effect did not access `count.value`
+    count.value = 10
+    t.equal(count.value, 10, 'count should be ten')
 })
 
 test('can pass in the max recursion depth', t => {
