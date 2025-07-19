@@ -49,6 +49,8 @@ npm i -S @substrate-system/signs
 
 Counting clicks.
 
+See [the live demo of this](https://substrate-system.github.io/signs/).
+
 This example is only 449 bytes after minifying and gzipping.
 
 ```ts
