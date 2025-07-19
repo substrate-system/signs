@@ -1,15 +1,14 @@
 export const CycleError = new Error('Cycle detected')
 
 const _effectStack: (() => any)[] = []
+const MAX_DEPTH = 100
 
 export type Sign<T> = {
     value:T
     peek: ()=>T
 }
 
-export function sign<T> (value:T, opts:{ maxDepth?:number } = {}):Sign<T> {
-    const MAX_DEPTH = opts.maxDepth || 100
-    let _recursion = 0
+export function sign<T> (value:T):Sign<T> {
     const subscriptions = new Set<()=>any>()
 
     return {
@@ -19,18 +18,12 @@ export function sign<T> (value:T, opts:{ maxDepth?:number } = {}):Sign<T> {
                 subscriptions.add(currentEffect)
             }
 
-            _recursion++
-            if (_recursion > MAX_DEPTH) {
-                throw CycleError
-            }
-
             return value
         },
 
         set value (newValue: T) {
             if (newValue === value) return
             value = newValue
-            _recursion = 0
             subscriptions.forEach(fn => fn())
         },
 
@@ -42,6 +35,9 @@ export function sign<T> (value:T, opts:{ maxDepth?:number } = {}):Sign<T> {
 
 export function effect (fn:()=>any):()=>void {
     const effectFn = () => {
+        if (_effectStack.length > MAX_DEPTH) {
+            throw CycleError
+        }
         _effectStack.push(effectFn)
         try {
             fn()

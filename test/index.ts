@@ -85,24 +85,24 @@ test('stop listening', (t) => {
     hello.value = 'hello again'
 })
 
-// test('throws Cycle Detected error', t => {
-//     t.plan(100)
-//     const hello = sign('hello 0')
-//     let count = 0
-//     try {
-//         effect(() => {
-//             count++
-//             t.equal(hello.value, 'hello ' + (count - 1),
-//                 'update within the effect')
-//             hello.value = 'hello ' + count
-//         })
-//     } catch (_err) {
-//         const err = _err as typeof CycleError
-//         t.equal(err.message, CycleError.message, 'Should throw "cycle detected"')
-//         t.equal(count, 97, 'should do 100 calls by default')  /* Why is this
-//             not 100? */
-//     }
-// })
+test('throws Cycle Detected error', t => {
+    t.plan(100)
+    const hello = sign('hello 0')
+    let count = 0
+    try {
+        effect(() => {
+            count++
+            t.equal(hello.value, 'hello ' + (count - 1),
+                'update from within the effect')
+            hello.value = 'hello ' + count
+        })
+    } catch (_err) {
+        const err = _err as typeof CycleError
+        t.equal(err.message, CycleError.message, 'Should throw "cycle detected"')
+        t.equal(count, 97, 'should do 100 calls by default')  /* Why is this
+            not 100? */
+    }
+})
 
 test('multiple subscriptions', t => {
     const hello = sign('hello')
