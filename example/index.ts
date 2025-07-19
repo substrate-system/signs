@@ -5,7 +5,7 @@ const count = sign(0)
 
 qs('#root').innerHTML = `
     <h1 class="count">${count.value}</h1>
-    <button>Plus</button>
+    <button class="plus">Plus</button>
     <button class="reset">Reset</button>
 `
 
