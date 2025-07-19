@@ -20,7 +20,23 @@ magic or functionality.
 [See the typescript docs](https://substrate-system.github.io/signs/).
 
 <details><summary><h2>Contents</h2></summary>
+
 <!-- toc -->
+
+- [Install](#install)
+- [Example](#example)
+- [Modules](#modules)
+  * [ESM](#esm)
+  * [Common JS](#common-js)
+  * [pre-built JS](#pre-built-js)
+- [Develop](#develop)
+  * [Example](#example-1)
+  * [Filesizes](#filesizes)
+  * [Test](#test)
+- [See also](#see-also)
+
+<!-- tocstop -->
+
 </details>
 
 ## Install
@@ -29,13 +45,46 @@ magic or functionality.
 npm i -S @substrate-system/signs
 ```
 
+## Example
+
+Counting clicks.
+
+This example is only 449 bytes after minifying and gzipping.
+
+```ts
+import { effect, sign } from '@substrate-system/signs'
+const qs = document.querySelector.bind(document)
+
+const count = sign(0)
+
+qs('#root').innerHTML = `
+    <h1 class="count">${count.value}</h1>
+    <button>Plus</button>
+    <button class="reset">Reset</button>
+`
+
+effect(() => {
+    qs('h1').innerHTML = count.value
+})
+
+qs('button.reset').addEventListener('click', ev => {
+    ev.preventDefault()
+    count.value = 0
+})
+
+qs('button.plus').addEventListener('click', ev => {
+    ev.preventDefault()
+    count.value++
+})
+```
+
 ## Modules
 
 This exposes ESM and common JS via [package.json `exports` field](https://nodejs.org/api/packages.html#exports).
 
 ### ESM
 ```ts
-import { create, type Sign, type CycleError } from '@substrate-system/signs'
+import { sign, effect, computed, CycleError } from '@substrate-system/signs'
 ```
 
 ### Common JS
@@ -54,13 +103,31 @@ cp ./node_modules/@substrate-system/signs/dist/index.min.js ./public/signs.min.j
 
 #### HTML
 ```html
-<script type="module" src="./signs.min.js"></script>
+<script type="module" src="/signs.min.js"></script>
 ```
 
-## Example
+## Develop
 
-```ts
-// TODO
+### Example
+
+Start a localhost server of the `example` directory:
+
+```sh
+npm start
+```
+
+### Filesizes
+
+A convenient script that will tell you the filesize of the example app:
+
+```sh
+npm run size
+```
+
+### Test
+
+```sh
+npm test | npx tap-spec
 ```
 
 ## See also
