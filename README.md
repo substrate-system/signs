@@ -29,6 +29,7 @@ magic or functionality.
   * [`sign`](#sign)
   * [`sign.peek`](#signpeek)
   * [`effect`](#effect)
+  * [`batch`](#batch)
   * [`computed`](#computed)
 - [Modules](#modules)
   * [ESM](#esm)
@@ -132,6 +133,42 @@ Call the subscriber function any time the sign's value changes.
 function effect (fn:()=>any):()=>void
 ```
 
+### `batch`
+
+Combine multiple signal writes into one single update that is triggered at the end when the callback completes.
+
+```ts
+function batch<T> (fn: () => T): T
+```
+
+Batches can be nested and updates will be flushed when the outermost batch call completes.
+
+#### `batch` Example
+
+```js
+import { sign, computed, effect, batch } from '@substrate-system/signs'
+
+const name = sign('Jane')
+const surname = sign('Doe')
+const fullName = computed(() => name.value + ' ' + surname.value)
+
+// This effect will be called initially and once after the batch completes
+effect(() => console.log(fullName.value))
+
+// Combines both signal writes into one update. Once the callback
+// returns the effect will trigger and we'll log "Foo Bar"
+batch(() => {
+    name.value = 'Foo'
+    surname.value = 'Bar'
+})
+```
+
+When you access a signal that you wrote to earlier inside the callback, or access a computed signal that was invalidated by another signal, the computed signal will update to reflect the current value, but effects will still be deferred until the end of the batch.
+
+```ts
+function effect (fn:()=>any):()=>void
+```
+
 ### `computed`
 
 Create a new sign that will update whenever the root sign changes.
@@ -163,12 +200,12 @@ This exposes ESM and common JS via [package.json `exports` field](https://nodejs
 
 ### ESM
 ```ts
-import { sign, effect, computed, CycleError } from '@substrate-system/signs'
+import { sign, effect, computed, batch, CycleError } from '@substrate-system/signs'
 ```
 
 ### Common JS
 ```js
-const signs = require('@substrate-system/signs')
+const { sign, effect, computed, batch, CycleError } = require('@substrate-system/signs')
 ```
 
 ### pre-built JS

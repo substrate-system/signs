@@ -1,5 +1,5 @@
 import { test } from '@substrate-system/tapzero'
-import { sign, effect, computed, CycleError } from '../src/index.js'
+import { sign, effect, computed, batch, CycleError } from '../src/index.js'
 
 test('create a signal', async t => {
     t.plan(2)
@@ -205,4 +205,91 @@ test('subscribe to two signals', t => {
 
     hello.value = 'world'
     foo.value = 'bar'
+})
+
+test('batch - simple test', t => {
+    t.plan(2)
+    const counter = sign(0)
+    let effectCallCount = 0
+
+    effect(() => {
+        effectCallCount++
+        const _ = counter.value // subscribe to counter
+    })
+
+    // Initial effect call
+    t.equal(effectCallCount, 1, 'should call effect initially')
+
+    // Batch should defer the effect until completion
+    batch(() => {
+        counter.value = 1
+    })
+
+    t.equal(effectCallCount, 2, 'effect should be called after batch')
+})
+
+test('batch - basic functionality', t => {
+    t.plan(3)
+    const name = sign('Jane')
+    const surname = sign('Doe')
+    const fullName = computed(() => name.value + ' ' + surname.value)
+
+    let effectCallCount = 0
+    effect(() => {
+        effectCallCount++
+        const value = fullName.value
+        if (effectCallCount === 1) {
+            t.equal(value, 'Jane Doe', 'should start with initial value')
+        } else if (effectCallCount === 2) {
+            t.equal(value, 'Foo Bar', 'should update once after batch completes')
+        }
+    })
+
+    // This should only trigger the effect once, not twice
+    batch(() => {
+        name.value = 'Foo'
+        surname.value = 'Bar'
+    })
+
+    t.equal(effectCallCount, 2, 'effect should only be called twice (initial + batch)')
+})
+
+test('batch - nested batches', t => {
+    t.plan(2)
+    const counter = sign(0)
+    let effectCallCount = 0
+
+    effect(() => {
+        effectCallCount++
+        const _ = counter.value // subscribe to counter
+    })
+
+    // Initial effect call
+    t.equal(effectCallCount, 1, 'should call effect initially')
+
+    // Nested batches should defer until outermost completes
+    batch(() => {
+        batch(() => {
+            counter.value = 1
+            // Effect shouldn't be called yet
+            t.equal(effectCallCount, 1,
+                'effect should not be called during nested batch')
+        })
+        // Still inside outer batch, effect shouldn't be called yet
+    })
+    // Now effect should be called
+})
+
+test('batch - reading values during batch', t => {
+    t.plan(2)
+    const counter = sign(0)
+    const double = computed(() => counter.value * 2)
+
+    batch(() => {
+        counter.value = 5
+        // Should be able to read the updated value during batch
+        t.equal(counter.value, 5, 'should read updated value during batch')
+        t.equal(double.value, 10,
+            'computed should update when accessed during batch')
+    })
 })
