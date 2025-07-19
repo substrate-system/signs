@@ -51,7 +51,7 @@ Counting clicks.
 
 See [the live demo of this](https://substrate-system.github.io/signs/).
 
-This example is only 449 bytes after minifying and gzipping.
+This example is only 748 bytes after minifying and gzipping.
 
 ```ts
 import { effect, sign } from '@substrate-system/signs'
