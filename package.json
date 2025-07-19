@@ -21,6 +21,7 @@
     "build": "mkdir -p ./dist && rm -rf ./dist/* && npm run build-esm",
     "build-docs": "typedoc ./src/index.ts",
     "toc": "markdown-toc --maxdepth 3 -i README.md",
+    "start": "vite",
     "preversion": "npm run lint",
     "version": "npm run toc && auto-changelog -p --template keepachangelog --breaking-pattern 'BREAKING CHANGE:' && git add CHANGELOG.md README.md",
     "postversion": "git push --follow-tags && npm publish",
@@ -37,9 +38,11 @@
     "eslint": "^8.57.0",
     "eslint-config-standard": "^17.1.0",
     "markdown-toc": "^1.2.0",
+    "postcss-nesting": "^13.0.2",
     "tap-spec": "^5.0.0",
     "typedoc": "^0.28.5",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vite": "^6.3.5"
   },
   "author": "nichoth <nichoth@gmail.com> (https://nichoth.com)",
   "repository": {
