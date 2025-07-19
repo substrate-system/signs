@@ -20,6 +20,7 @@
     "build-esm": "esbuild src/*.ts --format=esm --metafile=dist/meta.json --keep-names --tsconfig=tsconfig.build.json --outdir=./dist --sourcemap && tsc --emitDeclarationOnly --project tsconfig.build.json --outDir dist",
     "build": "mkdir -p ./dist && rm -rf ./dist/* && npm run build-esm",
     "build-docs": "typedoc ./src/index.ts",
+    "build-example": "mkdir -p ./public && rm -rf ./public/* && VITE_DEBUG_MODE=staging vite --mode staging --base=\"/signs\" build",
     "size": "node scripts/analyze-size.js",
     "toc": "markdown-toc --maxdepth 3 -i README.md",
     "start": "vite",
