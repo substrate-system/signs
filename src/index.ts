@@ -1,15 +1,26 @@
 export const CycleError = new Error('Cycle detected')
 
 const _effectStack: (() => any)[] = []
-const MAX_DEPTH = 100
+let _globalMaxDepth = 100
+const DEFAULT_MAX_DEPTH = 100
+
+export type SignOptions = {
+    maxDepth?: number
+}
 
 export type Sign<T> = {
     value:T
     peek: ()=>T
 }
 
-export function sign<T> (value:T):Sign<T> {
+export function sign<T> (value:T, options?: SignOptions):Sign<T> {
+    const maxDepth = options?.maxDepth ?? DEFAULT_MAX_DEPTH
     const subscriptions = new Set<()=>any>()
+
+    // If this signal has a custom maxDepth, set it globally
+    if (options?.maxDepth !== undefined) {
+        _globalMaxDepth = maxDepth
+    }
 
     return {
         get value (): T {
@@ -35,7 +46,7 @@ export function sign<T> (value:T):Sign<T> {
 
 export function effect (fn:()=>any):()=>void {
     const effectFn = () => {
-        if (_effectStack.length > MAX_DEPTH) {
+        if (_effectStack.length > _globalMaxDepth) {
             throw CycleError
         }
         _effectStack.push(effectFn)

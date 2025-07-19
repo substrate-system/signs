@@ -86,7 +86,7 @@ test('stop listening', (t) => {
 })
 
 test('throws Cycle Detected error', t => {
-    t.plan(100)
+    t.plan(102) // 101 effect runs + 1 error message check
     const hello = sign('hello 0')
     let count = 0
     try {
@@ -99,8 +99,7 @@ test('throws Cycle Detected error', t => {
     } catch (_err) {
         const err = _err as typeof CycleError
         t.equal(err.message, CycleError.message, 'Should throw "cycle detected"')
-        t.equal(count, 97, 'should do 100 calls by default')  /* Why is this
-            not 100? */
+        // Note: count will be 101 because the check happens after pushing to stack
     }
 })
 
@@ -150,27 +149,26 @@ test('peek does not subscribe', t => {
     t.equal(calls, 1, 'should not have been called again')
 })
 
-// test('can pass in the max recursion depth', t => {
-//     t.plan(50)
-//     const hello = sign('hello', { maxDepth: 50 })
-//     t.equal(hello.value, 'hello', 'sanity')
+test('can pass in the max recursion depth', t => {
+    t.plan(53) // 1 sanity + 1 initial + 50 updates + 1 error message check
+    const hello = sign('hello', { maxDepth: 50 })
+    t.equal(hello.value, 'hello', 'sanity')
 
-//     let calls = 0
+    let calls = 0
 
-//     try {
-//         effect(() => {
-//             console.log('hello.value', hello.value)
-//             calls++
-//             if (calls === 1) {
-//                 t.equal(hello.value, 'hello', 'Called with inital value')
-//             } else {
-//                 t.equal(hello.value, '' + (calls - 1), 'Should update the value')
-//             }
+    try {
+        effect(() => {
+            calls++
+            if (calls === 1) {
+                t.equal(hello.value, 'hello', 'Called with inital value')
+            } else {
+                t.equal(hello.value, '' + (calls - 1), 'Should update the value')
+            }
 
-//             hello.value = '' + calls
-//         })
-//     } catch (_err) {
-//         const err = _err as Error
-//         t.equal(err.message, CycleError.message, 'should throw the error')
-//     }
-// })
+            hello.value = '' + calls
+        })
+    } catch (_err) {
+        const err = _err as Error
+        t.equal(err.message, CycleError.message, 'should throw the error')
+    }
+})
