@@ -5,9 +5,8 @@
 [![semantic versioning](https://img.shields.io/badge/semver-2.0.0-blue?logo=semver&style=flat-square)](https://semver.org/)
 [![Common Changelog](https://nichoth.github.io/badge/common-changelog.svg)](./CHANGELOG.md)
 [![install size](https://flat.badgen.net/packagephobia/install/@substrate-system/signs?)](https://packagephobia.com/result?p=@substrate-system/signs)
-[![GZip size](https://flat.badgen.net/bundlephobia/minzip/@substrate-system/signs?color=green)](https://bundlephobia.com/package/@substrate-system/signs)
+[![GZip size](https://flat.badgen.net/bundlephobia/minzip/@substrate-system/signs)](https://bundlephobia.com/package/@substrate-system/signs)
 [![dependencies](https://img.shields.io/badge/dependencies-zero-brightgreen.svg?style=flat-square)](package.json)
-[![license](https://img.shields.io/badge/license-Big_Time-blue?style=flat-square)](LICENSE)
 
 
 A smaller, simpler [signals](https://github.com/tc39/proposal-signals).
@@ -90,7 +89,14 @@ qs('button.plus').addEventListener('click', ev => {
 
 ### `sign`
 
+Create a new `sign`.
+
 ```ts
+type Sign<T> = {
+    value:T
+    peek:()=>T
+}
+
 function sign<T> (value:T, options?: SignOptions):Sign<T>
 ```
 
