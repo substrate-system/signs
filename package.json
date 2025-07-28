@@ -48,7 +48,7 @@
     "tap-spec": "^5.0.0",
     "typedoc": "^0.28.5",
     "typescript": "^5.7.2",
-    "vite": "^6.3.5"
+    "vite": "^7.0.6"
   },
   "author": "nichoth <nichoth@gmail.com> (https://nichoth.com)",
   "repository": {
