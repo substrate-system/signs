@@ -16,8 +16,6 @@ Look at [alien-signals](https://github.com/stackblitz/alien-signals) or
 [@preact/signals](https://github.com/preactjs/signals) if you need more
 magic or functionality.
 
-[See the typescript docs](https://substrate-system.github.io/signs/).
-
 <details><summary><h2>Contents</h2></summary>
 
 <!-- toc -->
