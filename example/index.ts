@@ -3,17 +3,17 @@ const qs = document.querySelector.bind(document)
 
 const count = sign(0)
 
-qs('#root').innerHTML = `
+qs('#root')!.innerHTML = `
     <h1 class="count">${count.value}</h1>
     <button class="plus">Plus</button>
     <button class="reset">Reset</button>
 `
 
 effect(() => {
-    qs('h1').innerHTML = count.value
+    qs('h1')!.innerHTML = '' + count.value
 })
 
-qs('button.reset').addEventListener('click', ev => {
+qs('button.reset')?.addEventListener('click', ev => {
     ev.preventDefault()
     count.value = 0
 })

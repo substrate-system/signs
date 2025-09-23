@@ -1,12 +1,12 @@
 export const CycleError = new Error('Cycle detected')
 
-const _effectStack: (() => any)[] = []
+const _effectStack:(() => any)[] = []
 let _globalMaxDepth = 100
 const DEFAULT_MAX_DEPTH = 100
 
 // Batching state
 let _batchDepth = 0
-let _batchedEffects: ((() => any) & { _execute?: () => void })[] = []
+let _batchedEffects:((() => any) & { _execute?:() => void })[] = []
 
 export type SignOptions = {
     maxDepth?:number
@@ -17,7 +17,7 @@ export type Sign<T> = {
     peek:()=>T
 }
 
-export function sign<T> (value:T, options?: SignOptions):Sign<T> {
+export function sign<T> (value:T, options?:SignOptions):Sign<T> {
     const maxDepth = options?.maxDepth ?? DEFAULT_MAX_DEPTH
     const subscriptions = new Set<()=>any>()
 
@@ -27,7 +27,7 @@ export function sign<T> (value:T, options?: SignOptions):Sign<T> {
     }
 
     return {
-        get value (): T {
+        get value ():T {
             const currentEffect = _effectStack[_effectStack.length - 1]
             if (currentEffect) {
                 subscriptions.add(currentEffect)
@@ -36,7 +36,7 @@ export function sign<T> (value:T, options?: SignOptions):Sign<T> {
             return value
         },
 
-        set value (newValue: T) {
+        set value (newValue:T) {
             if (newValue === value) return
             value = newValue
 
@@ -163,7 +163,7 @@ export function computed<T> (fn:()=>T):Sign<T> {
     return computedSign
 }
 
-export function batch<T> (fn: () => T): T {
+export function batch<T> (fn:() => T):T {
     _batchDepth++
 
     try {
